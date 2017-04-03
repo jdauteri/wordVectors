@@ -4,8 +4,9 @@ author: "Jessica"
 date: "4/2/2017"
 output: html_document
 ---
-
+The Word Vectors package was created by Ben Schmidt and meant to allow for better handling of Word Embedding Models than the word2vec pakage through functions that allow to train your own WEMs and analyze existing WEMs. This tutorial is drawn heavily from his tutorials included at the end of this rmd document. Install/load the following packages and files.
 ```{r setup, include=FALSE}
+devtools::install_github("bmschmidt/wordVectors")
 library(devtools)
 library(wordVectors)
 library(magrittr)
@@ -13,22 +14,123 @@ library(tokenizers)
 billboard = read.vectors("billboards_vectors.bin")
 ```
 
-## R Markdown
+Before starting, it is important to note the two main goals of word embedding models. By embedding singular words in space, we are able to get a sense of (1) similarities of word usage and (2) similar relationships between words. The billboards_vectors.bin file you loaded in is already trained as a WEM. It is a collection of Billboard magazines from the 1930s-2010s, and contains way more words than would be possible to make meaningful analyses from. Therein lies the beauty of wordVectors--it allows you to view the discursive relationships between words that are buried from view due to quantity, or your inability to read outside of ideological structures, or both. Avoiding a conversation of structuralist semiotics, and because this WEM is already trained, let's skip directly to analyzing the relationships between words in this vector.
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+First, we can explore the relationship of between records and other words in the Billboard Magazine. The simplest way to do this is to use the "nearest_to()" function.
+```{r}
+billboard %>% nearest_to("record") %>% round(3)
+```
+For the most part, this vector represents words that relate to the word "record," perhaps with the exception "assures," although this might be an industry term laymen are unfamiliar with.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+Some words are harder to create meaningful vectors from. For instance, words like "good" or "nice" tend to give expectedly vague responses.
+```{r}
+billboard %>% nearest_to("good") %>% round(3)
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+The same goes for the word "bad," which appeared in the previous vector (slang? "bad" as in "good"?).
+```{r}
+billboard %>% nearest_to("bad") %>% round(3)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Interestingly, the word "cool" showed up in both vectors, although clearly more towards weather-oriented terms in the "bad" vector. If we run a vector using the word cool, it skews even more in the weather-direction (and not towards The Weather Report, as one might expect in a music magazine).
+```{r}
+billboard %>% nearest_to("cool") %>% round(3)
+```
+
+These results were clearly not what we are looking for. You can get a little more specific by telling it to remove certain words that are not useful for you. However, before doing this, in the spirit of unveiling surprising discursive relationships, it might first be worth considering what kinds of words show up.
+```{r}
+not_that_kind_of_bad = billboard[["bad"]] %>%
+      reject(billboard[["weather"]]) %>% 
+      reject(billboard[["rain"]])
+billboard %>% closest_to(not_that_kind_of_bad)
+
+not_that_kind_of_good = billboard[["good"]] %>%
+      reject(billboard[["also"]]) %>% 
+      reject(billboard[["weather"]])
+billboard %>% closest_to(not_that_kind_of_good)
+```
+
+Take a minute and play with some other words that might create useful lists. Try to search a word and then further refine the list so it reveals a useful group. What might be another list that would be useful from Billboard?
+```{r}
+
+```
+
+If you are unsure about where to start with a corpus, there's a way in wordVectors to generate random clusters to help exploration.
+```{r}
+set.seed(10)
+centers = 150
+clustering = kmeans(billboard,centers=centers,iter.max = 40)
+
+sapply(sample(1:centers,10),function(n) {
+  names(clustering$cluster[clustering$cluster==n][1:10])
+})
+```
+
+However, let's get back to our "record" example. Although the vector we got seemed relatively useful, we can be more precise with the relationships we ask wordVectors to display by clustering similar words together.
+```{r}
+#You can change the number to change the amount of words in the vector
+billboard %>% 
+  closest_to(c("record", "music", "band", "popular", "swing"),150)
+```
+
+This process is more-or-less trial and error until we get a cluster that seems logical. Let's add to this list together and see if we can get a more useful list.
+```{r}
+music_words <- billboard %>% 
+  closest_to(c("music", "band", "popular", "swing", "records"),300)
+```
+
+#Analogies with wordVectors
+
+```{r}
+billboard %>% closest_to(~"he" - "she")
+```
+
+What happens if we switch these?
+
+```{r}
+billboard %>% closest_to(~"she" - "he")
+```
+
+Slightly more coherent. We can perform analogy functions to explore ways that gender might be coded into the Billboard corpus. You can think of the following as starting with "gal", removing its similarity to "he", and additing a similarity to "she".
+
+```{r}
+billboard %>% closest_to(~ "lady" - "he" + "she")
+
+billboard %>% closest_to(~ "man" - "she" + "he")
+```
+
+Now, you can plot these words to get a sense of how words are represented in space. If you imagine an arrow connecting the gendered terms, you can see that they go in one direction. Man --> Woman; Joe --> Godiva; Guy --> Lady. The male term --> female term.
+```{r}
+billboard[[c("lady", "guy", "man", "woman", "godiva", "joe"), average=F]] %>% 
+  plot(method="pca")
+```
+
+There are several ways to plot word embedding models. I will give an example below because it uses ggplot, but consult Ben Schdmidt's tutorials for several others.
+```{r}
+library(ggplot2)
+library(dplyr)
+
+
+top_evaluative_words = billboard %>% 
+   closest_to(~ "good" + "bad", n=75)
+
+goodness = billboard %>% 
+  closest_to(~ "good" - "bad",n=Inf)
+
+badness = billboard %>% 
+  closest_to(~ "bad" - "good", n=Inf)
+
+femininity = billboard %>% 
+  closest_to(~ "lady" - "man",n=Inf)
+
+masculinity = billboard %>% 
+  closest_to(~ "lady" - "man",n=Inf)
+
+top_evaluative_words %>%
+  inner_join(goodness) %>%
+  inner_join(femininity) %>%
+  ggplot() + 
+  geom_text(aes(x=`similarity to "lady" - "man"`,
+                y=`similarity to "good" - "bad"`,
+                label=word))
+```
