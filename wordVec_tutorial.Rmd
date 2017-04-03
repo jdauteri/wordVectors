@@ -107,6 +107,7 @@ billboard[[c("lady", "guy", "man", "woman", "godiva", "joe"), average=F]] %>%
 
 There are several ways to plot word embedding models. I will give an example below because it uses ggplot, but consult Ben Schdmidt's tutorials for several others.
 ```{r}
+#how can i make this better? look through tutorial
 library(ggplot2)
 library(dplyr)
 
