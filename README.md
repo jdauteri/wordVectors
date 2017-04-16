@@ -1,0 +1,1 @@
+This repo contains the content and the tutorial to learn how to use wordVectors in R Studio.
