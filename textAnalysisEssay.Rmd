@@ -27,45 +27,38 @@ First, here is a graph of the words that share a similiarity between country and
 genres = billboard[[c("blues","country"),average=F]]
 
 #take 4500 most common words
-countryness_and_bluesiness = billboard[2000:4500,] %>% 
+countryness_and_bluesiness = billboard[1000:4500,] %>% 
   cosineSimilarity(genres)
 
 #filter to top 75
 c_b_filter = countryness_and_bluesiness[
-  rank(-countryness_and_bluesiness[,1])<75 |
-  rank(-countryness_and_bluesiness[,2])<75,
+  rank(-countryness_and_bluesiness[,1])<150 |
+  rank(-countryness_and_bluesiness[,2])<150,
   ] %>% 
   as.data.frame() %>% 
   tibble::rownames_to_column()
 
-#print
-c_b_filter %>% 
-  arrange(desc(blues)) %>% 
-  filter(blues > .35)
-```
-
-This chart of the top 75 words (chosen for clarity and relevance) reveals several expected terms in common: waltz, tune, and bluebird all refer to country and blues, but skew towards blues. However, there are a few surprises. Although the term "negro" which would be expected to be more closely related to the blues does fall there, the term "hillbilly" has a negative relationship to country and a positive one to blues. There are other interesting pieces of the chart. There are various ethnicities, irish and latino, that might not always be considered with country and the blues, yet have a positive relationship to both. Also, the word "rumba" has a positive relationship. This seems suprising, since blues is usually considered to be a southern, black music.
-
-```{r, echo=FALSE, warning=FALSE}
 #plot
 filter_graph <- c_b_filter %>%
-  filter(blues < .6,
-         blues > .2,
-         country < .2) %>% 
   ggplot(aes(x = blues, y = country)) +
   geom_text(aes(label = rowname)) 
 ggplotly(filter_graph)
 ```
 
+
+This chart of the top 75 words (chosen for clarity and relevance) reveals several expected terms in common: waltz, tune, and bluebird all refer to country and blues, but skew towards blues. However, there are a few surprises. Although the term "negro" which would be expected to be more closely related to the blues does fall there, the term "hillbilly" has a negative relationship to country and a positive one to blues. There are other interesting pieces of the chart. There are various ethnicities, irish and latino, that might not always be considered with country and the blues, yet have a positive relationship to both. Also, the word "rumba" has a positive relationship. This seems suprising, since blues is usually considered to be a southern, black music.
+
+
+
 Harlem has almost an equally positive relationship, which suggests that these two genres were spoken about together. With such close connections some of the more suprising terms (rumba, latin, gypsy) make a lot more sense, since they are often used to describe jazz. This indicates a problematic relationship between genre as a racial distinction as it formed in the 1930s and as a musical distinction, since blues music should have more in common with country (geographically and tranditionally) than jazz. What this begins to suggest is the inadequacy of defining music within genre distinctions.
 
 These charts suggest further lines of inquiry. It would be interesting to compare instrumentation between genres to see how musical distinction plays into this. It would also be interesting to see how gender and value judgments might interfere with genre. It might also be useful to do a topic model on the genres themselves 
 
-```{r, echo=FALSE, warning=FALSE}
+```{r, echo=FALSE,warning=FALSE}
 genres3 = billboard[[c("blues","country","minstrel"),average=F]]
 
 #take 4500 most common words
-BMC_frame = billboard[1:4500,] %>% 
+BMC_frame = billboard[1000:4500,] %>% 
   cosineSimilarity(genres3)
 
 #filter to top 75
