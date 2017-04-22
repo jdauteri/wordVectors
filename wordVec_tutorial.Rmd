@@ -233,10 +233,6 @@ top_evaluative_words %>%
                 y=`similarity to "worst" - "best"`,
                 label=word)) +
   geom_abline(a=0,b=1)
-
-##to move from wordVectors to ggplot
-as.data.frame()
-add_rownames()
 ```
 
 To learn more about wordVectors, consult the tutorials below.
