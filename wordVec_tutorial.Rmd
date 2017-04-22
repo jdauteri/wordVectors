@@ -8,8 +8,8 @@ output: html_document
 The wordVectors package was created by Ben Schmidt and meant to allow for better handling of Word Embedding Models (WEMs). This tutorial is drawn heavily from his tutorials, included at the end of this document. To start, download the billboards_vectors.bin file in the github repository, and then install/load the following packages.
 
 ```{r setup, include=FALSE}
-# devtools::install_github("bmschmidt/wordVectors")
-# library(devtools)
+devtools::install_github("bmschmidt/wordVectors")
+library(devtools)
 library(wordVectors)
 library(magrittr)
 library(tokenizers)
@@ -91,14 +91,15 @@ billboard %>%
 Like many text analysis strategies, this process is iterative until we get a cluster that seems logical. Let's try to create a logical cluster of instrument words below.
 
 ```{r}
-
+instrument_words = billboard %>% 
+   closest_to(c("percussion", "brass", "guitar", "flute", "tambourine", "reed", "bass"), 50)
 ```
 
 Now that we have our instrument words, we can plot them to begin to see how they might look in space. Visualizing the corpus in this way can get complicated and contain hundreds of dimensions, so narrowing your list down to useful terms can help to refine and make the spatialization work of wordVectors more useful. However, this chart does not tell us much yet.
 
 ```{r} 
-#instruments = billboard[[instrument_words$word,average=F]]
-#plot(instruments,method="pca")
+instruments = billboard[[instrument_words$word,average=F]]
+plot(instruments,method="pca")
 ```
 
 Another way to plot words with wordVectors is to take two words (dimensions), locate a certain vocabulary common to both, and plot those words to demonstrate the relationship to each. In this case, we will plot words according to their jazziness or countryness.
@@ -111,9 +112,9 @@ jazziness_and_countryness = billboard[1:3000,] %>% cosineSimilarity(genres)
 
 #filter to top 20
 jazziness_and_countryness = jazziness_and_countryness[
-  rank(-jazziness_and_countryness[,1])<20 |
-  rank(-jazziness_and_countryness[,2])<20,
-  ]
+  rank(-jazziness_and_countryness[,1])<50 |
+  rank(-jazziness_and_countryness[,2])<50,
+  ] 
 
 #plot
 genre_chart = plot(jazziness_and_countryness,type='n')
@@ -150,7 +151,7 @@ billboard %>% closest_to(~"her" + "him",20)
 We can also use the "-" sign to indicate a vector of words like one but not like the other. We can read the following as: words closest to "her", but not close to "him." If we switch them, it yields a different vector.
 
 ```{r}
-billboard %>% closest_to(~"her" - "him",20)
+billboard %>% closest_to(~"him" - "her",20)
 ```
 
 Analogy functions can become even more complicated. You can think of the following as starting with the word "lady", removing its similarity to "her", and additing a similarity to "him".
@@ -163,7 +164,7 @@ billboard %>% closest_to(~ "brother" - "him" + "her",20)
 
 This vector shows that the closest thing to lady and him, and not her, is "gent." By analyzing spatial relationships, wordVectors can reveal the gendered relationships between words and has the potential to yield useful and/or unexpected results.
 
-We can also plot these gendered words to get a sense of how words are represented in space. If you imagine an arrow connecting the gendered terms, you can see that they go in one direction. Man --> Woman; Joe --> Godiva; Guy --> Lady. The male term --> female term.
+We can also plot these gendered words to get a sense of how words are represented in space. If you imagine an arrow connecting the gendered terms, you can see that they go in one direction. Man --> Woman; Gent --> Lady; Father --> Daughter. The male term --> female term.
 
 ```{r}
 billboard[[c("woman", "man", "lady", "gent", "father", "daughter"), average=F]] %>%
@@ -225,13 +226,17 @@ masculinity = billboard %>%
   closest_to(~ "him" - "her",n=Inf)
 
 top_evaluative_words %>%
-  inner_join(goodness) %>%
-  inner_join(masculinity) %>%
+  inner_join(badness) %>%
+  inner_join(femininity) %>%
   ggplot() + 
-  geom_text(aes(x=`similarity to "him" - "her"`,
-                y=`similarity to "best" - "worst"`,
+  geom_text(aes(x=`similarity to "her" - "him"`,
+                y=`similarity to "worst" - "best"`,
                 label=word)) +
   geom_abline(a=0,b=1)
+
+##to move from wordVectors to ggplot
+as.data.frame()
+add_rownames()
 ```
 
 To learn more about wordVectors, consult the tutorials below.
