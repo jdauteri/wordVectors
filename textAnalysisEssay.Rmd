@@ -75,3 +75,6 @@ minstrelsy_graph <- BMC_filter %>%
   geom_text(aes(label = rowname)) 
 ggplotly(minstrelsy_graph)
 ```
+
+
+http://www.oxfordamerican.org/magazine/item/1166-the-winsome-moan 
