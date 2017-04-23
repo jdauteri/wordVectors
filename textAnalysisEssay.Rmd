@@ -16,13 +16,8 @@ library(plotly)
 billboard = read.vectors("billboards_vectors.bin")
 ```
 
-This essay will investigate how genre was spoken about in Billboard Magazine by taking a large sample of pages and years (1930s-2010s) and using wordVectors to find similarities between certain words. In this instance, I am curious how the blues was talked about in relation to country and in relation to jazz. I chose these comparisons because they are genres that became racially coded around the time that this corpus starts. I chose to use the entire run of Billboard (rather than choosing a selection) in order to capture the widest range of ways that these two genres were spoken about. What is revealed here, is perhaps not all surprising: jazz and blues are more closely related than blues and country. However, within these larger statements, there are interesting findings that suggest possibilities for further research on the process of genre in the music industry.
+This essay will problematize distinctions between genres in _Billboard Magazine_ by taking a large sample of issues through time (1930s-2010s), and using wordVectors to find similarities between particular words. Here, I plan to explore the ways that "folk" musics are talked about, by searching for the words that have come to reference traditional music traditions--"country" and "blues." Surely, country and blues music both stem from southern traditions, a soundscape that is often mis-remembered as isolated from popular culture and segregated, despite shared communities more united by being laborers than divided by race and connected with the rest of nation through technologies of transmission and transportation. Yet, once record companies became interested in recording "southern" music, musicians were separated from one another largely for marketing purposes--black artists were packaged as "race" records and white artists as "hillbilly" records and were then easy to sell to retail stores in a segregated America. This text analysis reflects this complicated history around recording American folk music that not only defies the color line, but also suggests a larger sphere of musical influence than what is typically understood as "traditional" roots music.[^1]
 
-My hypothesis is that Billboard discussed genre more in terms of race than in terms of musical qualities. To do so, I will first exmamine the relationship between country and blues music, which shares similiar instrumentation and geographic associations. I will then compare blues and jazz music, that have different musical traditions and are typically divided between rural and urban areas. My hypothesis is that jazz and blues will have more in common than blues and country because of the way that genre become a racially coded tool of the music indsutry.
-
-
-
-First, here is a graph of the words that share a similiarity between country and blues. As you can see from this chart, country and blues have a negative relationship, and this sample of the vector below indicates this relationship. 
 ```{r, echo=FALSE, warning=FALSE}
 genres = billboard[[c("blues","country"),average=F]]
 
@@ -30,7 +25,7 @@ genres = billboard[[c("blues","country"),average=F]]
 countryness_and_bluesiness = billboard[1000:4500,] %>% 
   cosineSimilarity(genres)
 
-#filter to top 75
+#filter to top 150
 c_b_filter = countryness_and_bluesiness[
   rank(-countryness_and_bluesiness[,1])<150 |
   rank(-countryness_and_bluesiness[,2])<150,
@@ -45,27 +40,22 @@ filter_graph <- c_b_filter %>%
 ggplotly(filter_graph)
 ```
 
+Plotting the top 150 words with similarities between "country" and "blues" reveals at first glance that there are very few words that have a close relationship to both. Rather, they are clusetered as words that are either more similar to country or more similar to blues, perhaps suggesting that there is actually less overlap between these genres than suggested above. In fact, zooming in on the country chunk (it is an interactive graph, so draw a square with your cursor around the segment you wish you view) reveals words like "depression", "jobbers", "wheeling", "flood", and "hills", playing into ideas about country musicians as iternerant, working class folks, and especially reflecting the way that folklorists "discovered" these musicians during the Great Depression. However, zooming in on the "blues" chunk reveals some suprising terms.
 
-This chart of the top 75 words (chosen for clarity and relevance) reveals several expected terms in common: waltz, tune, and bluebird all refer to country and blues, but skew towards blues. However, there are a few surprises. Although the term "negro" which would be expected to be more closely related to the blues does fall there, the term "hillbilly" has a negative relationship to country and a positive one to blues. There are other interesting pieces of the chart. There are various ethnicities, irish and latino, that might not always be considered with country and the blues, yet have a positive relationship to both. Also, the word "rumba" has a positive relationship. This seems suprising, since blues is usually considered to be a southern, black music.
-
-
-
-Harlem has almost an equally positive relationship, which suggests that these two genres were spoken about together. With such close connections some of the more suprising terms (rumba, latin, gypsy) make a lot more sense, since they are often used to describe jazz. This indicates a problematic relationship between genre as a racial distinction as it formed in the 1930s and as a musical distinction, since blues music should have more in common with country (geographically and tranditionally) than jazz. What this begins to suggest is the inadequacy of defining music within genre distinctions.
-
-These charts suggest further lines of inquiry. It would be interesting to compare instrumentation between genres to see how musical distinction plays into this. It would also be interesting to see how gender and value judgments might interfere with genre. It might also be useful to do a topic model on the genres themselves 
+First, you find words like "latin", "spanish", and "rumba". You also find "harlem", which certainly does not fit the understanding of blues music as a southern tradition, and suggests that _Billboard_ might have talked about blues in close alignment with jazz. (In fact, running similarities between "blues" and "jazz" does reveal a very close positive relationship, and has its own implications for how race and geography (de)construct genre that are beyond the scope of this essay.) However, there are other words in this cluster that raise more quesions about the relationship between country and blues. "Negro" is displayed with about a .3 similarity to "blues," but also a .1 similarity to "country." Moreover, "cowboy" and "hillbilly" both skew more towards "blues" than "country." This suggests that the early origins of blues music (and perhaps later understandings, too) reflect shared musical traditions between black and white musicians, and brings attention to the obfuscation of black cowboys from historical memory.[^2] Another interesting word appears, "Hawaiian," which seems surprising because Hawaiin music has such a strong connection to white, middle class leisure in the 1950s and 1960s. However, as historian John Troutman has recently uncovered, Hawaiian steel guitar had a much larger emphasis on blues music than was previously thought.[^3] What this graph begins to reveal, then, is a reconsideration of how American folk music memory has been structured, and what people and traditions were erased through the solidification of genre.
 
 ```{r, echo=FALSE,warning=FALSE}
 genres3 = billboard[[c("blues","country","minstrel"),average=F]]
 
 #take 4500 most common words
-BMC_frame = billboard[1000:4500,] %>% 
+BMC_frame = billboard[2000:4500,] %>% 
   cosineSimilarity(genres3)
 
 #filter to top 75
 BMC_filter = BMC_frame[
-  rank(-BMC_frame[,1])<50 |
-  rank(-BMC_frame[,2])<50 |
-  rank(-BMC_frame[,3])<50,
+  rank(-BMC_frame[,1])<150 |
+  rank(-BMC_frame[,2])<150 |
+  rank(-BMC_frame[,3])<150,
   ] %>% 
   as.data.frame() %>% 
   tibble::rownames_to_column()
@@ -76,5 +66,10 @@ minstrelsy_graph <- BMC_filter %>%
 ggplotly(minstrelsy_graph)
 ```
 
+Adding a third element to the analysis--"minstrel"--reveals some surprising findings that even further complicate our notion of folk music. First, you can see that a new cluster of words appears that are common to both country blues, and these words are those that relate to minstrelsy in a variety of ways. This raises a complicated question about the relationship between these genres (again, as genres, not musical traditions) and minstrelsy as perhaps their most common factor. This is one the questions at the root of the "Hearing the Americas" project, and seems to be supported by this graph which demonstrates, through shared words like "rube" and "comedian", that perhaps the popularity of comedic recordings of minstrelsy, vaudeville, blackface and other "novelties" might be the strongest connection betweeen the "roots" of these two genres. 
 
-http://www.oxfordamerican.org/magazine/item/1166-the-winsome-moan 
+One final note--the word "folk" doesn't appear until analyzing the "country," "blues," "minstrel" vectors together, and has a close positive relationship to both blues and country, despite its contemporary connotations as a white, working class music. This can be read as suggestive of the disparate goals of folklorists and commerical recording companies to define and package an "American" musical tradition--folklorists sought traditional "folk" while record companies wanted "hits" that still relied on popular live traditions of big band, minstrelsy, and jazz. Other evidence to this point is the close relationship between early labels like "victor," "decca," and "okeh" to blues, and their negative relationships to country. There are surely more themes revealed in this analysis, and many more vectors that can be run to investigate the questions they raise. However, these two graphs can be used as a starting point to unpack the murkiness of genre distinction, and suggests a reconsideration of what--and who--we write about when we write about "folk" music.
+
+[^1]: Historian Karl Hagstrom Miller articulates these ideas in depth in, Karl Hagstrom Miller, _Segregating Sound: Inventing Folk and Pop Music in the Age of Jim Crow_, Durhham: Duke University Press, 2010.
+[^2]: http://www.npr.org/2010/12/05/131761541/we-ve-all-heard-cowboy-songs-but-who-were-the-cowboys
+[^3]: http://www.oxfordamerican.org/magazine/item/1166-the-winsome-moan 
