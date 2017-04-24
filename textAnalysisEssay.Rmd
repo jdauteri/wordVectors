@@ -1,7 +1,7 @@
 ---
 title: "Using wordVectors to Uncover the 'Folk' in _Billboard Magazine_"
 author: "Jessica Dauterive"
-date: "4/23/2017"
+date: "4/24/2017"
 output: html_document
 ---
 ```{r setup, include=FALSE}
